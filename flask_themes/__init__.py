@@ -159,13 +159,9 @@ def load_themes_from(path):
     :param path: The path to search for themes in.
     """
     for basename in (b for b in list_folders(path) if IDENTIFIER.match(b)):
-        try:
-            t = Theme(os.path.join(path, basename))
-        except:
-            pass
-        else:
-            if t.identifier == basename:
-                yield t
+        t = Theme(os.path.join(path, basename))
+        if t.identifier == basename:
+            yield t
 
 
 def packaged_themes_loader(app):
