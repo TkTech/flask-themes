@@ -8,7 +8,6 @@ applications. It takes care of:
 - Rendering templates from themes
 - Serving static files like CSS and images from themes
 
-
 Links
 `````
 * `documentation <http://packages.python.org/Flask-Themes>`_
@@ -27,9 +26,9 @@ if sys.version_info < (2, 6):
 test_requires = ['nose']
 
 setup(
-    name='Flask-Themes',
-    version='0.1.5',
-    url='http://bitbucket.org/leafstorm/flask-themes/',
+    name='flask-themes3',
+    version='0.1.0',
+    url='http://github.com/tktech/flask-themes',
     license='MIT',
     author='Matthew \"LeafStorm\" Frazier',
     author_email='leafstormrush@gmail.com',

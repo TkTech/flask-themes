@@ -229,7 +229,20 @@ class ThemeManager(object):
             self.loaders.extend((packaged_themes_loader, theme_paths_loader))
 
     def init_app(self, app):
-        self.bind_app(app)
+        """
+        If an app wasn't bound when the manager was created, this will bind
+        it. The app must be bound for the loaders to work.
+
+        :param app: A `~flask.Flask` instance.
+        """
+        if self.app_identifier is None:
+            self.app_identifier = app.import_name
+
+        self.app = app
+        app.theme_manager = self
+        app.jinja_env.globals['theme'] = global_theme_template
+        app.jinja_env.globals['theme_static'] = global_theme_static
+        app.register_blueprint(themes_blueprint, url_prefix='/_theme')
 
     @property
     def themes(self):
@@ -246,16 +259,6 @@ class ThemeManager(object):
         This yields all the `Theme` objects, in sorted order.
         """
         return sorted(itervalues(self.themes), key=attrgetter('identifier'))
-
-    def bind_app(self, app):
-        """
-        If an app wasn't bound when the manager was created, this will bind
-        it. The app must be bound for the loaders to work.
-
-        :param app: A `~flask.Flask` instance.
-        """
-        self.app = app
-        app.theme_manager = self
 
     def valid_app_id(self, app_identifier):
         """
@@ -358,31 +361,6 @@ def static(themeid, filename):
 
 themes_blueprint.add_url_rule('/<themeid>/<path:filename>', 'static',
                               view_func=static)
-
-
-def setup_themes(app, loaders=None, app_identifier=None,
-                 manager_cls=ThemeManager, theme_url_prefix='/_themes'):
-    """
-    This sets up the theme infrastructure by adding a `ThemeManager` to the
-    given app and registering the module/blueprint containing the views and
-    templates needed.
-
-    :param app: The `~flask.Flask` instance to set up themes for.
-    :param loaders: An iterable of loaders to use. It defaults to
-                    `packaged_themes_loader` and `theme_paths_loader`.
-    :param app_identifier: The application identifier to use. If not given,
-                           it defaults to the app's import name.
-    :param manager_cls: If you need a custom manager class, you can pass it
-                        in here.
-    :param theme_url_prefix: The prefix to use for the URLs on the themes
-                             module. (Defaults to ``/_themes``.)
-    """
-    if app_identifier is None:
-        app_identifier = app.import_name
-    manager_cls(app, app_identifier, loaders=loaders)
-    app.jinja_env.globals['theme'] = global_theme_template
-    app.jinja_env.globals['theme_static'] = global_theme_static
-    app.register_blueprint(themes_blueprint, url_prefix=theme_url_prefix)
 
 
 def active_theme(ctx):
